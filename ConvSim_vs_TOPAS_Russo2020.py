@@ -146,8 +146,6 @@ sim = Simulation(Mask=mask, Detector=detector, a=sg.origin_mm[2], b=b, photon_co
                  non_central_coll_effect=True,
                  transmission_rate=0.01)
 print("Elapsed time: %.2fs." % (time.time() - t0))
-# plot(sim.Detector_image_noisefree)
-# Output is of int32 type:
 dect = sim.Detector_image_noisy
 
 # --- Plotting ---
