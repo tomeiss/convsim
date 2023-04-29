@@ -13,7 +13,6 @@ ConvSim requires the following Python packages:
 * matplotlib 3.5.0
 
 Please note the following:
-* We publish the software as it is and do not guarantee proper performance.
-* This software is provided "as is" and no support will be provided.
+* We publish the software as it is, do not guarantee proper performance and do not provide support
 * Nevertheless, we highly acknowledge feedback. Use the issues functionality in github. If you feel like contributing, just open a pull request.
 
