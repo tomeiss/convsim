@@ -99,6 +99,9 @@ class Simulation:
         # Get raw detector images per slice:
         self.get_detector_images_conv()
 
+        # Do relative weighting of the raw detector images due to distance and intensities per slice:
+        self.do_photon_allotment()
+
         # Everything below here modifies Detector_images_2D_raw
         # --------- COS3 EFFECT ---------
         if self.non_central_cos3_effect:
@@ -107,9 +110,6 @@ class Simulation:
         # --------- COLLIMATION EFFECT ---------
         if self.non_central_coll_effect:
             self.apply_non_central_coll_maps_for_single_source()
-
-        # Do relative weighting of the raw detector images due to distance and intensities per slice:
-        self.do_photon_allotment()
 
         # Sets Detector_image_noisy and Detector_image_noisefree:
         self.get_summed_detector_image_conv()
