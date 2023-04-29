@@ -491,6 +491,12 @@ if __name__ == "__main__":
                           aperture_radius_mm=0.08 / 2.0)
     detector = DetectorObject(size_px=448, size_mm=min(24.64, 28.16))
     sim = Simulation(Mask=mask, Detector=detector, a=sg.origin_mm[2], b=b, photon_count=1_000_000, Source=sg,
-                     simulation_name="sim", non_central_cos3_effect=True, non_central_coll_effect=False,
+                     simulation_name="sim", non_central_cos3_effect=False, non_central_coll_effect=False,
                      transmission_rate=0.01)
+    plt.figure()
+    plt.imshow(sim.Detector_image_noisy)
+    plt.title("Simulation without near field effects")
+    plt.colorbar()
+    plt.tight_layout()
+    plt.show()
 
