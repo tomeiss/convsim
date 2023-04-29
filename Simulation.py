@@ -1,3 +1,9 @@
+"""
+If you use this software, please cite it as follows:
+T. Meißner and S. Pietrantonio et al., "Towards a fast and accurate simulation framework for 3D spherical source
+localization in the near field of a coded aperture gamma camera," 2023.
+"""
+
 import numpy as np
 import cv2
 
