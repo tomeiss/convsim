@@ -1,15 +1,15 @@
 """
+This script runs ConvSim simulations as described in the given publication, loads the detector images from TOPAS and
+creates the comparative figures from the paper.
 
-
-DISCLAIMER:
-This entire software is provided "as is" and no support will be provided.
+If you use this software, please cite it as follows:
+T. Meißner and S. Pietrantonio et al., "Towards a fast and accurate simulation framework for 3D spherical source
+localization in the near field of a coded aperture gamma camera," 2023.
 
 """
 
 import os
 import time
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -20,10 +20,76 @@ from SourceGenerators import EllipsoidSourceGenerator
 
 
 def norm(img):
+    """ Normalizes the given image to the range [0, 1]"""
     return (img - img.min()) / (img.max() - img.min())
 
 
+def plotp(data_cube, title="", projection_fnc=np.sum, colorbar=True, subtitles=None):
+    """
+    subtitles: subtitles which go over the left and right sub-plots
+    colorbar: if a colorbar should be depicted or not.
+    data_cube: 3d numpy array to make projection figure of.
+    title: str. Comes at the top of figure.
+    projection_fnc: Should be either np.sum or np.max. Different styles of projecting the cube to a 2D
+    representation. It is somewhat hard to get the actual voxel values from np.sum.
+    Returns a plt.figure which can then be saved, shown or closed.
+    """
+    data_cube = np.array(data_cube).squeeze()
+
+    if subtitles is None:
+        subtitles = ["Sum Projection along Z direction.", "Sum Projection along Y direction."]
+
+    plt.close('all')
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    im = axs[0].imshow(projection_fnc(data_cube, 2))
+    if colorbar:
+        fig.colorbar(im, ax=axs[0])
+    axs[0].set_title(subtitles[0])
+
+    axs[0].set_xlabel("y [Pixel]")
+    axs[0].set_ylabel("x [Pixel]")
+    im = axs[1].imshow(projection_fnc(data_cube, 1))
+    if colorbar:
+        fig.colorbar(im, ax=axs[1])
+    axs[1].set_title(subtitles[1])
+    axs[1].set_xlabel("z [Pixel]")
+    axs[1].set_ylabel("x [Pixel]")
+    fig.suptitle(title)
+    plt.tight_layout()
+    return fig
+
+
+def plot(img, title="", ticks=True, colorbar=True, cmap=None, clim=None, filename="", dpi=None, cb_format=None,
+         fontsize=None):
+    """ Plot a single image."""
+    plt.clf()
+    plt.cla()
+    # plt.figure(figsize=(5, 5))
+    plt.imshow(np.squeeze(img), cmap=cmap)
+    if ticks == False:
+        plt.xticks([])
+        plt.yticks([])
+    if colorbar:
+        cb = plt.colorbar(format=cb_format)
+    if clim:
+        plt.clim(clim)
+    plt.title(str(title), fontsize=fontsize)
+
+    if fontsize:
+        cb.ax.tick_params(labelsize=fontsize)
+    if dpi:
+        plt.gcf().set_dpi(dpi)
+    plt.tight_layout()
+    fig = plt.gcf()
+    if filename == "":
+        plt.show()
+    else:
+        plt.savefig(filename)
+    return fig
+
+
 def triplot(images, titles=None, suptitle="", ticks=True, cmap=None, show=True):
+    """ Plots 3 images in a 1x3 subplot."""
     if titles is None:
         titles = ["", "", ""]
     plt.clf()
@@ -57,14 +123,8 @@ hd = 24.64  # mm. Smallest detector dimension
 hm = 9.92
 b = 22  # in mm. Detector-mask-distance
 
-topas_img = np.save("TOPAS_sphere_central_1mm.npy")
-topas_img = np.save("TOPAS_sphere_central_10mm.npy")
-topas_img = np.save("TOPAS_sphere_close_0_1mm.npy")
-topas_img = np.save("TOPAS_sphere_close_1mm.npy")
-topas_img = np.save("TOPAS_sphere_close_10mm.npy")
-topas_img = np.save("TOPAS_sphere_far_0_1mm.npy")
-topas_img = np.save("TOPAS_sphere_far_1mm.npy")
-topas_img = np.save("TOPAS_sphere_far_10mm.npy")
+# Disable any GPU:
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 # +++++++++++++++++++++++++++++++++++++++++++++ Sphere_central_0_1mm +++++++++++++++++++++++++++++++++++++++++++++
 sg = EllipsoidSourceGenerator(448, size_xy_mm=63.2 * hd / b, size_z_mm=10 * 0.1, centers_mm=[0, 0, 63.2],
@@ -73,7 +133,7 @@ sg.draw_sketch(b, hd, hm=hm).show()
 sg.convert_cube_to_pyramide(b=b, hd=hd)
 
 # Load Topas simulation result:
-topas_img = np.save("TOPAS_sphere_central_0_1mm.npy")
+topas_img = np.load("TOPAS_sphere_central_0_1mm.npy")
 
 # --- Simulation ---
 mask = MuraMaskObject(style_or_rank="russo2020", size_mm=9.92, thickness=0.11, aperture_shape="circle",
@@ -102,10 +162,11 @@ fig.savefig("Sphere_central_0_1mm.png")
 # +++++++++++++++++++++++++++++++++++++++++++++ Sphere_central_1mm +++++++++++++++++++++++++++++++++++++++++++++
 sg = EllipsoidSourceGenerator(448, size_xy_mm=63.2 * hd / b, size_z_mm=10 * 1.0, centers_mm=[0, 0, 63.2],
                               radii_mm=[1.0, 1.0, 1.0], intens=[1, ], origin_mm=[0, 0, 63.2])
+sg.draw_sketch(b, hd, hm=hm).show()
 sg.convert_cube_to_pyramide(b=b, hd=hd)
 
 # Load Topas simulation result:
-topas_img = np.save("TOPAS_sphere_central_1mm.npy")
+topas_img = np.load("TOPAS_sphere_central_1mm.npy")
 
 # --- Simulation ---
 mask = MuraMaskObject(style_or_rank="russo2020", size_mm=9.92, thickness=0.11, aperture_shape="circle",
@@ -132,10 +193,11 @@ fig.savefig("Sphere_central_1mm.png")
 # +++++++++++++++++++++++++++++++++++++++++++++ Sphere_central_10mm +++++++++++++++++++++++++++++++++++++++++++++
 sg = EllipsoidSourceGenerator(448, size_xy_mm=63.2 * hd / b, size_z_mm=10 * 10.0, centers_mm=[0, 0, 63.2],
                               radii_mm=[10, 10, 10], intens=[1, ], origin_mm=[0, 0, 63.2])
+sg.draw_sketch(b, hd, hm=hm).show()
 sg.convert_cube_to_pyramide(b=b, hd=hd)
 
 # Load Topas simulation result:
-topas_img = np.save("TOPAS_sphere_central_10mm.npy")
+topas_img = np.load("TOPAS_sphere_central_10mm.npy")
 
 # --- Simulation ---
 mask = MuraMaskObject(style_or_rank="russo2020", size_mm=9.92, thickness=0.11, aperture_shape="circle",
@@ -168,7 +230,7 @@ sg.convert_cube_to_pyramide(b=b, hd=hd)
 # plotp(sg.source_array).show()
 
 # Load Topas simulation result:
-topas_img = np.save("TOPAS_sphere_close_0_1mm.npy")
+topas_img = np.load("TOPAS_sphere_close_0_1mm.npy")
 
 # --- Simulation ---
 mask = MuraMaskObject(style_or_rank="russo2020", size_mm=9.92, thickness=0.11, aperture_shape="circle",
@@ -201,7 +263,7 @@ sg.convert_cube_to_pyramide(b=b, hd=hd)
 # plotp(sg.source_array).show()
 
 # Load Topas simulation result:
-topas_img = np.save("TOPAS_sphere_close_1mm.npy")
+topas_img = np.load("TOPAS_sphere_close_1mm.npy")
 
 # --- Simulation ---
 mask = MuraMaskObject(style_or_rank="russo2020", size_mm=9.92, thickness=0.11, aperture_shape="circle",
@@ -234,7 +296,7 @@ sg.convert_cube_to_pyramide(b=b, hd=hd)
 # plotp(sg.source_array).show()
 
 # Load Topas simulation result:
-topas_img = np.save("TOPAS_sphere_close_10mm.npy")
+topas_img = np.load("TOPAS_sphere_close_10mm.npy")
 
 # --- Simulation ---
 mask = MuraMaskObject(style_or_rank="russo2020", size_mm=9.92, thickness=0.11, aperture_shape="circle",
@@ -267,7 +329,7 @@ sg.convert_cube_to_pyramide(b=b, hd=hd)
 # plotp(sg.source_array).show()
 
 # Load Topas simulation result:
-topas_img = np.save("TOPAS_sphere_far_0_1mm.npy")
+topas_img = np.load("TOPAS_sphere_far_0_1mm.npy")
 
 # --- Simulation ---
 mask = MuraMaskObject(style_or_rank="russo2020", size_mm=9.92, thickness=0.11, aperture_shape="circle",
@@ -300,7 +362,7 @@ sg.convert_cube_to_pyramide(b=b, hd=hd)
 # plotp(sg.source_array).show()
 
 # Load Topas simulation result:
-topas_img = np.save("TOPAS_sphere_far_1mm.npy")
+topas_img = np.load("TOPAS_sphere_far_1mm.npy")
 
 # --- Simulation ---
 mask = MuraMaskObject(style_or_rank="russo2020", size_mm=9.92, thickness=0.11, aperture_shape="circle",
@@ -333,7 +395,7 @@ sg.convert_cube_to_pyramide(b=b, hd=hd)
 # plotp(sg.source_array).show()
 
 # Load Topas simulation result:
-topas_img = np.save("TOPAS_sphere_far_10mm.npy")
+topas_img = np.load("TOPAS_sphere_far_10mm.npy")
 
 # --- Simulation ---
 mask = MuraMaskObject(style_or_rank="russo2020", size_mm=9.92, thickness=0.11, aperture_shape="circle",
@@ -356,3 +418,6 @@ fig = triplot([topas_img, dect, topas_img - dect], suptitle="Sphere_far_10mm",
                       "nMS-SSIM: %.2f" % n_msssim], ticks=False, show=False)
 plt.text(10, 435, "%.2f" % n_msssim, c="white", fontsize=30)
 fig.savefig("Sphere_far_10mm.png")
+
+
+
