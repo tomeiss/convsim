@@ -71,12 +71,12 @@ def plot(img, title="", ticks=True, colorbar=True, cmap=None, clim=None, filenam
         plt.yticks([])
     if colorbar:
         cb = plt.colorbar(format=cb_format)
+        if fontsize:
+            cb.ax.tick_params(labelsize=fontsize)
     if clim:
         plt.clim(clim)
     plt.title(str(title), fontsize=fontsize)
 
-    if fontsize:
-        cb.ax.tick_params(labelsize=fontsize)
     if dpi:
         plt.gcf().set_dpi(dpi)
     plt.tight_layout()
