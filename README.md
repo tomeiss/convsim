@@ -3,8 +3,7 @@
 ConvSim is a fast simulation framework for 3D coded aperture imaging. It computes the detector image from a 3D volume distribution of gamma sources described as a voxel cube.  
 
 Detailed description:
-*T. Meißner and S. Pietrantonio et al., "Towards a fast and accurate simulation framework for 3D spherical source
-localization in the near field of a coded aperture gamma camera," 2023.* 
+*Meißner, T., Pietrantonio, S., Nahm, W., & Hesser, J. W. (2023). Towards a fast and accurate simulation framework for 3D spherical source localization in the near field of a coded aperture gamma camera. In L. D. Lilge & Z. Huang (Eds.), Translational Biophotonics: Diagnostics and Therapeutics III (Issue October, p. 20). SPIE. https://doi.org/10.1117/12.2670883*
 
 ConvSim requires the following Python packages:
 * numpy 1.19
